@@ -151,6 +151,135 @@ func TestAwsChaosListChaos(t *testing.T) {
 	chaos.ListChaos()
 }
 
+func TestCustomizeChaosIsDeleted(t *testing.T) {
+	g := NewGomegaWithT(t)
+
+	chaos := &CustomizeChaos{}
+	err := faker.FakeData(chaos)
+
+	g.Expect(err).To(BeNil())
+
+	chaos.IsDeleted()
+}
+
+func TestCustomizeChaosIsIsPaused(t *testing.T) {
+	g := NewGomegaWithT(t)
+
+	chaos := &CustomizeChaos{}
+	err := faker.FakeData(chaos)
+
+	g.Expect(err).To(BeNil())
+
+	chaos.IsPaused()
+}
+
+func TestCustomizeChaosGetDuration(t *testing.T) {
+	g := NewGomegaWithT(t)
+
+	chaos := &CustomizeChaos{}
+	err := faker.FakeData(chaos)
+
+	g.Expect(err).To(BeNil())
+
+	chaos.GetDuration()
+}
+
+func TestCustomizeChaosGetNextStart(t *testing.T) {
+	g := NewGomegaWithT(t)
+
+	chaos := &CustomizeChaos{}
+	err := faker.FakeData(chaos)
+
+	g.Expect(err).To(BeNil())
+
+	chaos.GetNextStart()
+}
+
+func TestCustomizeChaosSetNextStart(t *testing.T) {
+	g := NewGomegaWithT(t)
+
+	chaos := &CustomizeChaos{}
+	err := faker.FakeData(chaos)
+
+	g.Expect(err).To(BeNil())
+
+	chaos.SetNextStart(time.Now())
+}
+
+func TestCustomizeChaosGetNextRecover(t *testing.T) {
+	g := NewGomegaWithT(t)
+
+	chaos := &CustomizeChaos{}
+	err := faker.FakeData(chaos)
+
+	g.Expect(err).To(BeNil())
+
+	chaos.GetNextRecover()
+}
+
+func TestCustomizeChaosSetNextRecover(t *testing.T) {
+	g := NewGomegaWithT(t)
+
+	chaos := &CustomizeChaos{}
+	err := faker.FakeData(chaos)
+
+	g.Expect(err).To(BeNil())
+
+	chaos.SetNextRecover(time.Now())
+}
+
+func TestCustomizeChaosGetScheduler(t *testing.T) {
+	g := NewGomegaWithT(t)
+
+	chaos := &CustomizeChaos{}
+	err := faker.FakeData(chaos)
+
+	g.Expect(err).To(BeNil())
+
+	chaos.GetScheduler()
+}
+
+func TestCustomizeChaosGetChaos(t *testing.T) {
+	g := NewGomegaWithT(t)
+
+	chaos := &CustomizeChaos{}
+	err := faker.FakeData(chaos)
+
+	g.Expect(err).To(BeNil())
+
+	chaos.GetChaos()
+}
+
+func TestCustomizeChaosGetStatus(t *testing.T) {
+	g := NewGomegaWithT(t)
+
+	chaos := &CustomizeChaos{}
+	err := faker.FakeData(chaos)
+
+	g.Expect(err).To(BeNil())
+
+	chaos.GetStatus()
+}
+
+func TestCustomizeChaosGetSpecAndMetaString(t *testing.T) {
+	g := NewGomegaWithT(t)
+	chaos := &CustomizeChaos{}
+	err := faker.FakeData(chaos)
+	g.Expect(err).To(BeNil())
+	chaos.GetSpecAndMetaString()
+}
+
+func TestCustomizeChaosListChaos(t *testing.T) {
+	g := NewGomegaWithT(t)
+
+	chaos := &CustomizeChaosList{}
+	err := faker.FakeData(chaos)
+
+	g.Expect(err).To(BeNil())
+
+	chaos.ListChaos()
+}
+
 func TestDNSChaosIsDeleted(t *testing.T) {
 	g := NewGomegaWithT(t)
 

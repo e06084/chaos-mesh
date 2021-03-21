@@ -153,6 +153,138 @@ func (in *AwsChaosList) ListChaos() []*ChaosInstance {
 	return res
 }
 
+const KindCustomizeChaos = "CustomizeChaos"
+
+// IsDeleted returns whether this resource has been deleted
+func (in *CustomizeChaos) IsDeleted() bool {
+	return !in.DeletionTimestamp.IsZero()
+}
+
+// IsPaused returns whether this resource has been paused
+func (in *CustomizeChaos) IsPaused() bool {
+	if in.Annotations == nil || in.Annotations[PauseAnnotationKey] != "true" {
+		return false
+	}
+	return true
+}
+
+// GetDuration would return the duration for chaos
+func (in *CustomizeChaos) GetDuration() (*time.Duration, error) {
+	if in.Spec.Duration == nil {
+		return nil, nil
+	}
+	duration, err := time.ParseDuration(*in.Spec.Duration)
+	if err != nil {
+		return nil, err
+	}
+	return &duration, nil
+}
+
+func (in *CustomizeChaos) GetNextStart() time.Time {
+	if in.Status.Scheduler.NextStart == nil {
+		return time.Time{}
+	}
+	return in.Status.Scheduler.NextStart.Time
+}
+
+func (in *CustomizeChaos) SetNextStart(t time.Time) {
+	if t.IsZero() {
+		in.Status.Scheduler.NextStart = nil
+		return
+	}
+
+	if in.Status.Scheduler.NextStart == nil {
+		in.Status.Scheduler.NextStart = &metav1.Time{}
+	}
+	in.Status.Scheduler.NextStart.Time = t
+}
+
+func (in *CustomizeChaos) GetNextRecover() time.Time {
+	if in.Status.Scheduler.NextRecover == nil {
+		return time.Time{}
+	}
+	return in.Status.Scheduler.NextRecover.Time
+}
+
+func (in *CustomizeChaos) SetNextRecover(t time.Time) {
+	if t.IsZero() {
+		in.Status.Scheduler.NextRecover = nil
+		return
+	}
+
+	if in.Status.Scheduler.NextRecover == nil {
+		in.Status.Scheduler.NextRecover = &metav1.Time{}
+	}
+	in.Status.Scheduler.NextRecover.Time = t
+}
+
+// GetScheduler would return the scheduler for chaos
+func (in *CustomizeChaos) GetScheduler() *SchedulerSpec {
+	return in.Spec.Scheduler
+}
+
+// GetChaos would return the a record for chaos
+func (in *CustomizeChaos) GetChaos() *ChaosInstance {
+	instance := &ChaosInstance{
+		Name:      in.Name,
+		Namespace: in.Namespace,
+		Kind:      KindCustomizeChaos,
+		StartTime: in.CreationTimestamp.Time,
+		Action:    "",
+		Status:    string(in.Status.Experiment.Phase),
+		UID:       string(in.UID),
+	}
+
+	action := reflect.ValueOf(in).Elem().FieldByName("Spec").FieldByName("Action")
+	if action.IsValid() {
+		instance.Action = action.String()
+	}
+	if in.Spec.Duration != nil {
+		instance.Duration = *in.Spec.Duration
+	}
+	if in.DeletionTimestamp != nil {
+		instance.EndTime = in.DeletionTimestamp.Time
+	}
+	return instance
+}
+
+// GetStatus returns the status
+func (in *CustomizeChaos) GetStatus() *ChaosStatus {
+	return &in.Status.ChaosStatus
+}
+
+// GetSpecAndMetaString returns a string including the meta and spec field of this chaos object.
+func (in *CustomizeChaos) GetSpecAndMetaString() (string, error) {
+	spec, err := json.Marshal(in.Spec)
+	if err != nil {
+		return "", err
+	}
+
+	meta := in.ObjectMeta.DeepCopy()
+	meta.SetResourceVersion("")
+	meta.SetGeneration(0)
+
+	return string(spec) + meta.String(), nil
+}
+
+// +kubebuilder:object:root=true
+
+// CustomizeChaosList contains a list of CustomizeChaos
+type CustomizeChaosList struct {
+	metav1.TypeMeta `json:",inline"`
+	metav1.ListMeta `json:"metadata,omitempty"`
+	Items           []CustomizeChaos `json:"items"`
+}
+
+// ListChaos returns a list of chaos
+func (in *CustomizeChaosList) ListChaos() []*ChaosInstance {
+	res := make([]*ChaosInstance, 0, len(in.Items))
+	for _, item := range in.Items {
+		res = append(res, item.GetChaos())
+	}
+	return res
+}
+
 const KindDNSChaos = "DNSChaos"
 
 // IsDeleted returns whether this resource has been deleted
@@ -1349,6 +1481,12 @@ func init() {
 		ChaosList: &AwsChaosList{},
 	})
 
+	SchemeBuilder.Register(&CustomizeChaos{}, &CustomizeChaosList{})
+	all.register(KindCustomizeChaos, &ChaosKind{
+		Chaos:     &CustomizeChaos{},
+		ChaosList: &CustomizeChaosList{},
+	})
+
 	SchemeBuilder.Register(&DNSChaos{}, &DNSChaosList{})
 	all.register(KindDNSChaos, &ChaosKind{
 		Chaos:     &DNSChaos{},
@@ -1411,6 +1549,9 @@ func GetChaosValidator(chaosKind string) ChaosValidator {
 
 	case KindAwsChaos:
 		return &AwsChaos{}
+
+	case KindCustomizeChaos:
+		return &CustomizeChaos{}
 
 	case KindDNSChaos:
 		return &DNSChaos{}
